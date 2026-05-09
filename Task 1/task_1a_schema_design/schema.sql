@@ -121,3 +121,15 @@ CREATE INDEX idx_formulations_product_id ON formulations(product_id);
 -- Fast lookup for ingredients in a formulation
 CREATE INDEX idx_formulation_ingredients_formulation_id ON formulation_ingredients(formulation_id);
 CREATE INDEX idx_formulation_ingredients_raw_material_id ON formulation_ingredients(raw_material_id);
+
+-- Task 4: Shopify Reviews table
+CREATE TABLE reviews (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    product_sku VARCHAR(100) NOT NULL,
+    customer_name VARCHAR(255) NOT NULL,
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    review_text TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_reviews_product_sku ON reviews(product_sku);
