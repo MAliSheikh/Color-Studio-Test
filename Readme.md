@@ -79,10 +79,15 @@ Please see the internal `Task 2/README.md` for a full explanation of the design 
 
 ---
 
-## Task 3 — Price Comparison Scraper
+## Task 3 — AI-Powered Price Comparison Scraper
 
 The solution for Task 3 is located in the `Task 3/` folder.
-This is a Python scraper built with Playwright and SQLAlchemy. It scrapes eBay search results for cosmetic raw materials and dynamically creates a PostgreSQL-ready database (defaults to SQLite locally for immediate testing).
+This is an **AI-powered** price comparison scraper built with **Playwright** + **Groq AI (Llama 3.3 70B)**. It scrapes **Amazon** and **eBay** for cosmetic raw materials/packaging. Instead of brittle CSS selectors, it uses an LLM to intelligently extract product data from raw HTML — with keyword-based filtering to save 95%+ tokens.
+
+**Key features:**
+- Separate AI scraper module (`ai_scraper.py`) for intelligent data extraction
+- Rotating residential proxies, UA rotation, rate limiting, and 10+ anti-blocking measures
+- Price-change detection with historical tracking
 
 **To run the scraper:**
 ```bash
@@ -91,11 +96,14 @@ uv run playwright install chromium
 # Run once:
 uv run "Task 3/scraper.py"
 
+# Custom search terms:
+uv run "Task 3/scraper.py" --terms "glass dropper bottle 30ml" --max-items 3
+
 # Run on daily schedule (APScheduler, fires immediately + 08:00 UTC daily):
 uv run "Task 3/scraper.py" --schedule
 ```
 
-Please see the internal `Task 3/README.md` for a full explanation of the design choices, how the scraper bypasses basic bot protections, and how to schedule it using `cron` or `APScheduler`.
+Please see the internal `Task 3/README.md` for the full architecture explanation, anti-blocking measures, and token efficiency strategy.
 
 ---
 
