@@ -1,3 +1,16 @@
+How to Run the Project
+1. Install Dependencies
+First Run: 
+```bash
+pip install uv
+```
+Before running the project, you need to install the required Python 
+libraries. Run the following command in your terminal:
+
+uv sync
+
+All libraries will install automatically 
+
 For Task 1 a
 
 check task 1 folder which has sub filder task_1a_schema_design 
@@ -59,3 +72,21 @@ http://127.0.0.1:8000/docs
 *(Make sure to run this from the root directory so it can access the `.env` and `Task 1` vector database!)*
 
 Please see the internal `Task 2/README.md` for a full explanation of the design choices (SQLite state management, Prompts, Vector DB integration) and `curl` examples to test the English and Urdu flows.
+
+---
+
+## 🔹 Task 3: Price Comparison Scraper
+The solution for Task 3 is located in the `Task 3/` folder.
+This is a Python scraper built with Playwright and SQLAlchemy. It scrapes eBay search results for cosmetic raw materials and dynamically creates a PostgreSQL-ready database (defaults to SQLite locally for immediate testing).
+
+**To run the scraper:**
+```bash
+uv run playwright install chromium
+# Run once:
+uv run "Task 3/scraper.py"
+
+# Run on daily schedule (APScheduler, fires immediately + 08:00 UTC daily):
+uv run "Task 3/scraper.py" --schedule
+```
+
+Please see the internal `Task 3/README.md` for a full explanation of the design choices, how the scraper bypasses basic bot protections, and how to schedule it using `cron` or `APScheduler`.
