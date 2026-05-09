@@ -35,7 +35,7 @@ def chat_endpoint(request: ChatRequest):
     
     # Check if complete (all fields are filled)
     fields_dict = state.fields.model_dump()
-    state.complete = all(v is not None for v in fields_dict.values())
+    state.complete = all(v not in [None, ""] for v in fields_dict.values())
     
     # 4. Save to DB
     save_session(state)
