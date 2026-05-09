@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Reviews Widget</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent:    #6c63ff;
+      --accent2:   #a78bfa;
+      --gold:      #f59e0b;
+      --text:      #1a1d27;
+      --text-sub:  #6b7280;
+      --bg:        #ffffff;
+      --surface:   #f9fafb;
+      --border:    #e5e7eb;
+      --danger:    #ef4444;
+      --success:   #10b981;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 1.5rem;
+    }
+
+    /* ── Section heading ── */
+    .widget-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .widget-title { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.025em; }
+    .widget-subtitle { font-size: 0.8rem; color: var(--text-sub); margin-top: 2px; }
+
+    .rating-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 0.35rem 0.75rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #92400e;
+    }
+
+    /* ── AI Summary ── */
+    .ai-banner {
+      background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+      border: 1px solid #c4b5fd;
+      border-radius: 10px;
+      padding: 0.9rem 1rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .ai-emoji { font-size: 1.1rem; line-height: 1; padding-top: 2px; }
+    .ai-content { flex: 1; }
+    .ai-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: #7c3aed; font-weight: 700; margin-bottom: 0.25rem; }
+    .ai-text { font-size: 0.88rem; line-height: 1.55; color: #4c1d95; font-style: italic; }
+
+    /* ── Review cards ── */
+    .review-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.75rem; }
+
+    .review-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      transition: box-shadow 0.2s;
+      animation: fadeIn 0.3s ease both;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; } }
+
+    .review-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+
+    .rc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; }
+    .rc-meta { display: flex; align-items: center; gap: 0.6rem; }
+
+    .avatar-sm {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .rc-name { font-weight: 600; font-size: 0.85rem; }
+    .rc-date { font-size: 0.72rem; color: var(--text-sub); margin-top: 1px; }
+    .rc-text { font-size: 0.85rem; line-height: 1.65; color: #374151; }
+
+    .stars-sm { display: flex; gap: 1px; font-size: 0.85rem; }
+    .s-on { color: var(--gold); }
+    .s-off { color: #d1d5db; }
+
+    /* ── Empty state ── */
+    .empty { text-align: center; padding: 2.5rem 1rem; color: var(--text-sub); }
+    .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .empty p { font-size: 0.85rem; line-height: 1.6; }
+
+    /* ── Submit form ── */
+    .form-section {
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+    }
+
+    .form-title { font-size: 1rem; font-weight: 700; margin-bottom: 1.1rem; letter-spacing: -0.02em; }
+
+    .form-group { margin-bottom: 1rem; }
+
+    label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-sub); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      color: var(--text);
+      background: var(--bg);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      resize: vertical;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.12);
+    }
+
+    textarea { min-height: 90px; }
+
+    /* Star rating picker */
+    .star-picker { display: flex; gap: 4px; }
+    .star-pick {
+      font-size: 1.6rem;
+      color: #d1d5db;
+      cursor: pointer;
+      transition: color 0.15s, transform 0.15s;
+      line-height: 1;
+      user-select: none;
+    }
+    .star-pick:hover, .star-pick.selected { color: var(--gold); transform: scale(1.15); }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-submit:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .form-feedback {
+      margin-top: 0.75rem;
+      padding: 0.65rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.83rem;
+      font-weight: 500;
+      display: none;
+    }
+
+    .form-feedback.success { background: #ecfdf5; border: 1px solid #6ee7b7; color: #065f46; display: block; }
+    .form-feedback.error   { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; display: block; }
+  </style>
+</head>
+<body>
+
+<div class="widget-header">
+  <div>
+    <div class="widget-title">Customer Reviews</div>
+    <div class="widget-subtitle" id="subtitle">Loading reviews…</div>
+  </div>
+  <div class="rating-badge" id="rating-badge" style="display:none">
+    <span>★</span>
+    <span id="avg-rating">—</span>
+  </div>
+</div>
+
+<!-- AI Summary -->
+<div class="ai-banner" id="ai-banner" style="display:none">
+  <div class="ai-emoji">✨</div>
+  <div class="ai-content">
+    <div class="ai-label">AI Summary</div>
+    <div class="ai-text" id="ai-text"></div>
+  </div>
+</div>
+
+<!-- Review List -->
+<div class="review-list" id="review-list">
+  <!-- populated by JS -->
+</div>
+
+<!-- Empty state placeholder -->
+<div class="empty" id="empty-state" style="display:none">
+  <div class="empty-icon">💬</div>
+  <p>No reviews yet.<br>Be the first to share your experience!</p>
+</div>
+
+<!-- Submit Form -->
+<div class="form-section">
+  <div class="form-title">Write a Review</div>
+  <form id="review-form" novalidate>
+    <div class="form-group">
+      <label for="customer_name">Your Name</label>
+      <input type="text" id="customer_name" placeholder="Jane Doe" required />
+    </div>
+
+    <div class="form-group">
+      <label>Rating</label>
+      <div class="star-picker" id="star-picker" role="group" aria-label="Select rating">
+        <span class="star-pick" data-value="1">★</span>
+        <span class="star-pick" data-value="2">★</span>
+        <span class="star-pick" data-value="3">★</span>
+        <span class="star-pick" data-value="4">★</span>
+        <span class="star-pick" data-value="5">★</span>
+      </div>
+      <input type="hidden" id="rating" value="" />
+    </div>
+
+    <div class="form-group">
+      <label for="review_text">Review</label>
+      <textarea id="review_text" placeholder="Share your experience with this product…" required></textarea>
+    </div>
+
+    <button type="submit" class="btn-submit" id="submit-btn">Submit Review</button>
+    <div class="form-feedback" id="form-feedback"></div>
+  </form>
+</div>
+
+<script>
+  // ── Config ──────────────────────────────────────────────────────────────
+  const SKU = new URLSearchParams(window.location.search).get('sku') || 'DEMO-SKU-001';
+  const API_BASE = window.location.origin; // same server
+
+  // ── Star picker ──────────────────────────────────────────────────────────
+  let selectedRating = 0;
+  const stars = document.querySelectorAll('.star-pick');
+  const ratingInput = document.getElementById('rating');
+
+  function setRating(val) {
+    selectedRating = val;
+    ratingInput.value = val;
+    stars.forEach(s => {
+      const v = parseInt(s.dataset.value);
+      s.classList.toggle('selected', v <= val);
+    });
+  }
+
+  stars.forEach(star => {
+    star.addEventListener('click', () => setRating(parseInt(star.dataset.value)));
+    star.addEventListener('mouseenter', () => {
+      const v = parseInt(star.dataset.value);
+      stars.forEach(s => s.classList.toggle('selected', parseInt(s.dataset.value) <= v));
+    });
+    star.addEventListener('mouseleave', () => setRating(selectedRating));
+  });
+
+  // ── Load reviews ─────────────────────────────────────────────────────────
+  async function loadReviews() {
+    try {
+      const res = await fetch(`${API_BASE}/api/reviews?sku=${encodeURIComponent(SKU)}`);
+      const data = await res.json();
+
+      const subtitle = document.getElementById('subtitle');
+      const ratingBadge = document.getElementById('rating-badge');
+      const avgEl = document.getElementById('avg-rating');
+      const aiBanner = document.getElementById('ai-banner');
+      const aiText = document.getElementById('ai-text');
+      const list = document.getElementById('review-list');
+      const emptyState = document.getElementById('empty-state');
+
+      subtitle.textContent = `${data.total} review${data.total !== 1 ? 's' : ''} for ${SKU}`;
+
+      if (data.total > 0) {
+        ratingBadge.style.display = 'flex';
+        avgEl.textContent = data.average_rating.toFixed(1);
+      }
+
+      if (data.ai_summary) {
+        aiBanner.style.display = 'flex';
+        aiText.textContent = data.ai_summary;
+      }
+
+      if (data.reviews && data.reviews.length > 0) {
+        list.innerHTML = data.reviews.map((r, i) => `
+          <div class="review-card" style="animation-delay:${i * 0.05}s">
+            <div class="rc-header">
+              <div class="rc-meta">
+                <div class="avatar-sm">${r.customer_name.charAt(0).toUpperCase()}</div>
+                <div>
+                  <div class="rc-name">${escHtml(r.customer_name)}</div>
+                  <div class="rc-date">${formatDate(r.created_at)}</div>
+                </div>
+              </div>
+              <div class="stars-sm">
+                ${[1,2,3,4,5].map(n => `<span class="${n <= r.rating ? 's-on' : 's-off'}">★</span>`).join('')}
+              </div>
+            </div>
+            <div class="rc-text">${escHtml(r.review_text)}</div>
+          </div>
+        `).join('');
+      } else {
+        list.style.display = 'none';
+        emptyState.style.display = 'block';
+      }
+    } catch (err) {
+      console.error('Failed to load reviews', err);
+      document.getElementById('subtitle').textContent = 'Could not load reviews.';
+    }
+  }
+
+  // ── Submit form ──────────────────────────────────────────────────────────
+  document.getElementById('review-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const feedback = document.getElementById('form-feedback');
+    const btn = document.getElementById('submit-btn');
+    feedback.className = 'form-feedback';
+
+    const name = document.getElementById('customer_name').value.trim();
+    const text = document.getElementById('review_text').value.trim();
+
+    if (!name) { showFeedback('error', 'Please enter your name.'); return; }
+    if (!selectedRating) { showFeedback('error', 'Please select a star rating.'); return; }
+    if (!text) { showFeedback('error', 'Please write a review.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    try {
+      const res = await fetch(`${API_BASE}/api/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_sku: SKU, customer_name: name, rating: selectedRating, review_text: text }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        showFeedback('success', 'Thank you! Your review has been submitted.');
+        document.getElementById('customer_name').value = '';
+        document.getElementById('review_text').value = '';
+        setRating(0);
+        // Reload reviews after short delay
+        setTimeout(loadReviews, 800);
+      } else {
+        const msg = data.errors ? data.errors.join(', ') : (data.error || 'Submission failed.');
+        showFeedback('error', msg);
+      }
+    } catch (err) {
+      showFeedback('error', 'Network error. Please try again.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Submit Review';
+    }
+  });
+
+  function showFeedback(type, msg) {
+    const el = document.getElementById('form-feedback');
+    el.textContent = msg;
+    el.className = 'form-feedback ' + type;
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    try {
+      return new Date(iso).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+    } catch { return iso; }
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────────
+  loadReviews();
+</script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Install Product Reviews App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: radial-gradient(ellipse at top left, #1a1040 0%, #0f1117 50%, #0a0d14 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      color: #e2e8f0;
+    }
+
+    .card {
+      background: rgba(26, 29, 39, 0.9);
+      border: 1px solid rgba(108,99,255,0.2);
+      border-radius: 20px;
+      padding: 3rem;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 80px rgba(108,99,255,0.08), 0 25px 50px rgba(0,0,0,0.4);
+    }
+
+    .logo {
+      width: 72px;
+      height: 72px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #6c63ff, #a78bfa);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-size: 2rem;
+      box-shadow: 0 0 30px rgba(108,99,255,0.4);
+    }
+
+    h1 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; }
+
+    .subtitle { color: #8892a4; font-size: 0.9rem; line-height: 1.6; margin-bottom: 2rem; }
+
+    .features { text-align: left; margin-bottom: 2rem; display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      color: #c8d0df;
+    }
+
+    .feature-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, #6c63ff22, #a78bfa22);
+      border: 1px solid rgba(108,99,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.9rem 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: all 0.2s;
+      margin-bottom: 0.75rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #6c63ff, #a78bfa);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(108,99,255,0.3);
+    }
+
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(108,99,255,0.45); }
+
+    .btn-secondary {
+      background: transparent;
+      color: #8892a4;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .btn-secondary:hover { border-color: rgba(108,99,255,0.4); color: #e2e8f0; }
+
+    .divider { height: 1px; background: rgba(255,255,255,0.06); margin: 1.5rem 0; }
+
+    .api-info { font-size: 0.78rem; color: #8892a4; }
+    .api-info code {
+      background: rgba(108,99,255,0.15);
+      border: 1px solid rgba(108,99,255,0.2);
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: #a78bfa;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">⭐</div>
+    <h1>Product Reviews</h1>
+    <p class="subtitle">
+      Collect and display customer reviews on your Shopify store — powered by AI summaries.
+    </p>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">💬</div>
+        Customer review submissions with star ratings
+      </div>
+      <div class="feature">
+        <div class="feature-icon">✨</div>
+        AI-generated one-sentence review summaries
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🧩</div>
+        Theme App Block for Online Store 2.0
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📊</div>
+        Merchant admin dashboard
+      </div>
+    </div>
+
+    <a href="/admin" class="btn btn-primary">Open Review Dashboard →</a>
+    <a href="/widget?sku=DEMO-SKU-001" class="btn btn-secondary">Preview Storefront Widget</a>
+
+    <div class="divider"></div>
+
+    <div class="api-info">
+      Review API: <code>GET /api/reviews?sku=YOUR-SKU</code><br/>
+      Submit: <code>POST /api/reviews</code>
+    </div>
+  </div>
+</body>
+</html>

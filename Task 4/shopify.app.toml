@@ -1,0 +1,28 @@
+name = "color-studio-reviews"
+client_id = "9aaa6e0d47febca249c5cf275fa6b442"
+
+[build]
+  automatically_update_urls_on_dev = true
+  dev_store_url = "color-studio-test-inca4btn.myshopify.com"
+
+[access_scopes]
+  scopes = "read_products,write_products"
+
+[auth]
+  redirect_urls = [
+    "http://localhost:8000/auth/callback"
+  ]
+
+[webhooks]
+  api_version = "2024-01"
+
+[pos]
+  embedded = false
+
+[[extensions]]
+  type = "theme"
+  name = "product-reviews"
+  handle = "product-reviews"
+
+  [extensions.development]
+    root_dir = "extensions/product-reviews"

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Reviews — Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0f1117;
+      --surface:     #1a1d27;
+      --surface2:    #222536;
+      --border:      #2e3247;
+      --accent:      #6c63ff;
+      --accent2:     #a78bfa;
+      --text:        #e2e8f0;
+      --text-muted:  #8892a4;
+      --success:     #34d399;
+      --warning:     #fbbf24;
+      --danger:      #f87171;
+      --gold:        #f59e0b;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #1a1d27 0%, #16192a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .header-logo svg { color: var(--accent); }
+
+    .header-badge {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 99px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.25rem;
+    }
+
+    .page-subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+
+    /* ── SKU Selector ── */
+    .sku-selector {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.75rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .sku-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+
+    .sku-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; flex: 1; }
+
+    .sku-pill {
+      padding: 0.35rem 0.9rem;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .sku-pill:hover { border-color: var(--accent); color: var(--text); }
+    .sku-pill.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 0 16px rgba(108,99,255,0.35);
+    }
+
+    /* ── Stats Row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      transition: border-color 0.2s;
+    }
+
+    .stat-card:hover { border-color: var(--accent); }
+
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+    .stat-value { font-size: 2rem; font-weight: 700; letter-spacing: -0.04em; }
+    .stat-value.accent { color: var(--accent2); }
+    .stat-value.gold { color: var(--gold); }
+
+    /* ── AI Summary Card ── */
+    .ai-card {
+      background: linear-gradient(135deg, rgba(108,99,255,0.08) 0%, rgba(167,139,250,0.05) 100%);
+      border: 1px solid rgba(108,99,255,0.3);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.75rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .ai-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1rem;
+    }
+
+    .ai-content { flex: 1; }
+    .ai-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent2); font-weight: 600; margin-bottom: 0.4rem; }
+    .ai-text { font-size: 0.95rem; line-height: 1.6; color: var(--text); font-style: italic; }
+    .ai-no-summary { color: var(--text-muted); font-size: 0.9rem; }
+
+    /* ── Reviews Table / Cards ── */
+    .reviews-section { }
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .section-title { font-size: 1rem; font-weight: 600; }
+    .section-count {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: var(--surface2);
+      padding: 3px 10px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+    }
+
+    .review-list { display: flex; flex-direction: column; gap: 1rem; }
+
+    .review-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      transition: border-color 0.2s, transform 0.2s;
+      animation: fadeUp 0.3s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .review-card:hover { border-color: var(--border); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+
+    .review-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .reviewer-info { display: flex; align-items: center; gap: 0.75rem; }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .reviewer-name { font-weight: 600; font-size: 0.9rem; }
+    .review-date { font-size: 0.75rem; color: var(--text-muted); margin-top: 1px; }
+
+    .stars { display: flex; gap: 2px; font-size: 1rem; }
+    .star-filled { color: var(--gold); }
+    .star-empty { color: var(--border); }
+
+    .review-body { font-size: 0.88rem; line-height: 1.65; color: #c8d0df; }
+
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      color: var(--text-muted);
+    }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .container { padding: 1rem; }
+      .header { padding: 0 1rem; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+    Review Dashboard
+  </div>
+  <span class="header-badge">Shopify App</span>
+</header>
+
+<div class="container">
+  <h1 class="page-title">Product Reviews</h1>
+  <p class="page-subtitle">Manage and analyse customer feedback across all products.</p>
+
+  <!-- SKU Selector -->
+  {% if skus %}
+  <div class="sku-selector">
+    <span class="sku-label">Filter by SKU</span>
+    <div class="sku-pills">
+      {% for sku in skus %}
+      <a href="/admin?sku={{ sku }}" class="sku-pill {% if sku == selected_sku %}active{% endif %}">{{ sku }}</a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if selected_sku %}
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-label">Total Reviews</span>
+      <span class="stat-value accent">{{ total_reviews }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Average Rating</span>
+      <span class="stat-value gold">{{ avg_rating }} <span style="font-size:1rem;color:var(--gold)">★</span></span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Product SKU</span>
+      <span class="stat-value" style="font-size:1.1rem;padding-top:0.4rem;">{{ selected_sku }}</span>
+    </div>
+  </div>
+
+  <!-- AI Summary -->
+  <div class="ai-card">
+    <div class="ai-icon">✨</div>
+    <div class="ai-content">
+      <div class="ai-label">AI-Generated Summary</div>
+      {% if ai_summary %}
+        <div class="ai-text">{{ ai_summary }}</div>
+      {% else %}
+        <div class="ai-no-summary">No summary available — add more reviews or check your API key.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Reviews List -->
+  <div class="reviews-section">
+    <div class="section-header">
+      <span class="section-title">Customer Reviews</span>
+      <span class="section-count">{{ total_reviews }} review{% if total_reviews != 1 %}s{% endif %}</span>
+    </div>
+
+    {% if reviews %}
+    <div class="review-list">
+      {% for review in reviews %}
+      <div class="review-card" style="animation-delay: {{ loop.index0 * 0.05 }}s">
+        <div class="review-header">
+          <div class="reviewer-info">
+            <div class="avatar">{{ review.customer_name[0].upper() }}</div>
+            <div>
+              <div class="reviewer-name">{{ review.customer_name }}</div>
+              <div class="review-date">
+                {{ review.created_at.strftime('%b %d, %Y') if review.created_at else '' }}
+              </div>
+            </div>
+          </div>
+          <div class="stars">
+            {% for i in range(1, 6) %}
+              {% if i <= review.rating %}
+                <span class="star-filled">★</span>
+              {% else %}
+                <span class="star-empty">★</span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+        <div class="review-body">{{ review.review_text }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="icon">💬</div>
+      <p>No reviews yet for <strong>{{ selected_sku }}</strong>.<br>Reviews submitted via the storefront widget will appear here.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <div class="icon">📦</div>
+    <p>No reviews found in the database.<br>Install the App Block on your storefront to start collecting reviews.</p>
+  </div>
+  {% endif %}
+</div>
+
+</body>
+</html>

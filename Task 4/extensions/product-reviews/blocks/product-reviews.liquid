@@ -1,0 +1,496 @@
+{% comment %}
+  product-reviews.liquid
+  ─────────────────────────────────────────────────────────────────────────────
+  Shopify Theme App Extension — App Block
+  Target: section (product page)
+
+  This block renders the full review widget for a product on the storefront.
+  It loads reviews via JavaScript from the FastAPI server and renders them
+  inline — no page reload required.
+
+  Merchant settings (editable in the Theme Editor):
+    - app_url:        Base URL of your FastAPI review server
+    - show_ai_summary: Toggle the AI summary banner
+    - primary_color:  Accent colour for the widget
+    - widget_title:   Section heading text
+
+  Installation:
+  1. Push this extension via: shopify app deploy
+  2. In the Shopify Admin → Online Store → Themes → Customise
+  3. Navigate to a Product page template, click "Add block", choose "Product Reviews"
+  4. Set the App URL to your server URL (e.g. https://your-ngrok-url.ngrok.io)
+  5. Save — the widget will now appear on all product pages.
+{% endcomment %}
+
+{{ 'product-reviews.css' | asset_url | stylesheet_tag }}
+
+<div
+  class="pr-widget"
+  id="pr-widget-{{ block.id }}"
+  data-sku="{{ product.selected_or_first_available_variant.sku | default: product.handle }}"
+  data-app-url="{{ block.settings.app_url | strip_trailing_slash }}"
+  data-show-summary="{{ block.settings.show_ai_summary }}"
+  style="--pr-accent: {{ block.settings.primary_color }};"
+  {{ block.shopify_attributes }}
+>
+
+  <!-- Header -->
+  <div class="pr-header">
+    <div class="pr-title-group">
+      <h2 class="pr-title">{{ block.settings.widget_title }}</h2>
+      <span class="pr-subtitle" id="pr-subtitle-{{ block.id }}">Loading…</span>
+    </div>
+    <div class="pr-avg-badge" id="pr-avg-badge-{{ block.id }}" style="display:none">
+      <span class="pr-star">★</span>
+      <span class="pr-avg-value" id="pr-avg-{{ block.id }}"></span>
+    </div>
+  </div>
+
+  <!-- AI Summary -->
+  {% if block.settings.show_ai_summary %}
+  <div class="pr-ai-banner" id="pr-ai-{{ block.id }}" style="display:none">
+    <span class="pr-ai-icon">✨</span>
+    <div>
+      <div class="pr-ai-label">AI Summary</div>
+      <div class="pr-ai-text" id="pr-ai-text-{{ block.id }}"></div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Review List -->
+  <div class="pr-list" id="pr-list-{{ block.id }}"></div>
+
+  <!-- Empty State -->
+  <div class="pr-empty" id="pr-empty-{{ block.id }}" style="display:none">
+    <div class="pr-empty-icon">💬</div>
+    <p>No reviews yet. Be the first!</p>
+  </div>
+
+  <!-- Submission Form -->
+  <div class="pr-form-section">
+    <h3 class="pr-form-title">Write a Review</h3>
+    <form class="pr-form" id="pr-form-{{ block.id }}" novalidate>
+
+      <div class="pr-field">
+        <label class="pr-label" for="pr-name-{{ block.id }}">Your Name</label>
+        <input
+          class="pr-input"
+          type="text"
+          id="pr-name-{{ block.id }}"
+          placeholder="Jane Doe"
+          autocomplete="name"
+          required
+        />
+      </div>
+
+      <div class="pr-field">
+        <label class="pr-label">Rating</label>
+        <div class="pr-stars-picker" id="pr-stars-{{ block.id }}" role="group" aria-label="Select a rating from 1 to 5">
+          <span class="pr-star-btn" data-value="1" tabindex="0" role="radio" aria-checked="false" aria-label="1 star">★</span>
+          <span class="pr-star-btn" data-value="2" tabindex="0" role="radio" aria-checked="false" aria-label="2 stars">★</span>
+          <span class="pr-star-btn" data-value="3" tabindex="0" role="radio" aria-checked="false" aria-label="3 stars">★</span>
+          <span class="pr-star-btn" data-value="4" tabindex="0" role="radio" aria-checked="false" aria-label="4 stars">★</span>
+          <span class="pr-star-btn" data-value="5" tabindex="0" role="radio" aria-checked="false" aria-label="5 stars">★</span>
+        </div>
+        <input type="hidden" id="pr-rating-{{ block.id }}" value="" />
+      </div>
+
+      <div class="pr-field">
+        <label class="pr-label" for="pr-text-{{ block.id }}">Review</label>
+        <textarea
+          class="pr-textarea"
+          id="pr-text-{{ block.id }}"
+          placeholder="Share your experience with this product…"
+          rows="4"
+          required
+        ></textarea>
+      </div>
+
+      <button type="submit" class="pr-btn-submit" id="pr-submit-{{ block.id }}">
+        Submit Review
+      </button>
+      <div class="pr-feedback" id="pr-feedback-{{ block.id }}"></div>
+    </form>
+  </div>
+
+</div>
+
+<style>
+  /* ── Scoped widget styles ────────────────────────────────────────────── */
+  .pr-widget {
+    --pr-accent: #6c63ff;
+    --pr-gold: #f59e0b;
+    --pr-border: #e5e7eb;
+    --pr-bg: #f9fafb;
+    --pr-text: #111827;
+    --pr-muted: #6b7280;
+    font-family: inherit;
+    padding: 2rem 0;
+    border-top: 1px solid var(--pr-border);
+  }
+
+  .pr-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .pr-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0 0 0.15rem;
+    color: var(--pr-text);
+  }
+
+  .pr-subtitle { font-size: 0.82rem; color: var(--pr-muted); }
+
+  .pr-avg-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 0.35rem 0.75rem;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: #92400e;
+  }
+
+  .pr-star { color: var(--pr-gold); }
+
+  /* AI Banner */
+  .pr-ai-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    background: #f5f3ff;
+    border: 1px solid #c4b5fd;
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .pr-ai-icon { font-size: 1.1rem; line-height: 1; }
+  .pr-ai-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: #7c3aed; font-weight: 700; margin-bottom: 0.2rem; }
+  .pr-ai-text { font-size: 0.88rem; line-height: 1.55; color: #4c1d95; font-style: italic; }
+
+  /* Review cards */
+  .pr-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+
+  .pr-card {
+    background: var(--pr-bg);
+    border: 1px solid var(--pr-border);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+  }
+
+  .pr-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.6rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .pr-reviewer { display: flex; align-items: center; gap: 0.6rem; }
+
+  .pr-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--pr-accent), #a78bfa);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.78rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .pr-reviewer-name { font-weight: 600; font-size: 0.85rem; color: var(--pr-text); }
+  .pr-review-date { font-size: 0.72rem; color: var(--pr-muted); }
+
+  .pr-card-stars { display: flex; gap: 2px; font-size: 0.85rem; }
+  .pr-s-on { color: var(--pr-gold); }
+  .pr-s-off { color: #d1d5db; }
+
+  .pr-card-text { font-size: 0.85rem; line-height: 1.65; color: #374151; }
+
+  /* Empty state */
+  .pr-empty { text-align: center; padding: 2rem; color: var(--pr-muted); }
+  .pr-empty-icon { font-size: 2.25rem; margin-bottom: 0.5rem; }
+  .pr-empty p { font-size: 0.85rem; }
+
+  /* Form */
+  .pr-form-section { border-top: 1px solid var(--pr-border); padding-top: 1.5rem; }
+  .pr-form-title { font-size: 1rem; font-weight: 700; margin: 0 0 1rem; color: var(--pr-text); }
+  .pr-field { margin-bottom: 1rem; }
+
+  .pr-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--pr-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.4rem;
+  }
+
+  .pr-input, .pr-textarea {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--pr-border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.88rem;
+    color: var(--pr-text);
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    resize: vertical;
+  }
+
+  .pr-input:focus, .pr-textarea:focus {
+    border-color: var(--pr-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pr-accent) 15%, transparent);
+  }
+
+  /* Star picker */
+  .pr-stars-picker { display: flex; gap: 4px; }
+  .pr-star-btn {
+    font-size: 1.6rem;
+    color: #d1d5db;
+    cursor: pointer;
+    transition: color 0.15s, transform 0.15s;
+    line-height: 1;
+    user-select: none;
+  }
+  .pr-star-btn.active { color: var(--pr-gold); transform: scale(1.15); }
+
+  /* Submit button */
+  .pr-btn-submit {
+    width: 100%;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--pr-accent);
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+    margin-top: 0.25rem;
+  }
+
+  .pr-btn-submit:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+  .pr-btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Feedback messages */
+  .pr-feedback {
+    margin-top: 0.75rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+  .pr-feedback.pr-success { background: #ecfdf5; border: 1px solid #6ee7b7; color: #065f46; }
+  .pr-feedback.pr-error   { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+</style>
+
+<script>
+(function() {
+  const blockId  = '{{ block.id }}';
+  const widget   = document.getElementById('pr-widget-' + blockId);
+  const SKU      = widget.dataset.sku;
+  const API      = widget.dataset.appUrl;
+  const showSum  = widget.dataset.showSummary !== 'false';
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function fmtDate(iso) {
+    try { return new Date(iso).toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'}); }
+    catch { return ''; }
+  }
+
+  function stars(rating, total) {
+    return [1,2,3,4,5].map(n => `<span class="${n<=rating?'pr-s-on':'pr-s-off'}">★</span>`).join('');
+  }
+
+  // ── Load reviews ──────────────────────────────────────────────────────────
+  async function loadReviews() {
+    try {
+      const res  = await fetch(API + '/api/reviews?sku=' + encodeURIComponent(SKU));
+      const data = await res.json();
+
+      document.getElementById('pr-subtitle-' + blockId).textContent =
+        data.total + ' review' + (data.total !== 1 ? 's' : '');
+
+      if (data.total > 0) {
+        const badge = document.getElementById('pr-avg-badge-' + blockId);
+        badge.style.display = 'flex';
+        document.getElementById('pr-avg-' + blockId).textContent = data.average_rating.toFixed(1);
+      }
+
+      if (showSum && data.ai_summary) {
+        const banner = document.getElementById('pr-ai-' + blockId);
+        if (banner) {
+          banner.style.display = 'flex';
+          document.getElementById('pr-ai-text-' + blockId).textContent = data.ai_summary;
+        }
+      }
+
+      const list = document.getElementById('pr-list-' + blockId);
+      if (data.reviews && data.reviews.length > 0) {
+        list.innerHTML = data.reviews.map(r => `
+          <div class="pr-card">
+            <div class="pr-card-header">
+              <div class="pr-reviewer">
+                <div class="pr-avatar">${esc(r.customer_name.charAt(0).toUpperCase())}</div>
+                <div>
+                  <div class="pr-reviewer-name">${esc(r.customer_name)}</div>
+                  <div class="pr-review-date">${fmtDate(r.created_at)}</div>
+                </div>
+              </div>
+              <div class="pr-card-stars">${stars(r.rating)}</div>
+            </div>
+            <div class="pr-card-text">${esc(r.review_text)}</div>
+          </div>
+        `).join('');
+      } else {
+        list.style.display = 'none';
+        document.getElementById('pr-empty-' + blockId).style.display = 'block';
+      }
+    } catch(err) {
+      document.getElementById('pr-subtitle-' + blockId).textContent = 'Reviews unavailable.';
+      console.error('[Product Reviews]', err);
+    }
+  }
+
+  // ── Star picker ───────────────────────────────────────────────────────────
+  let selectedRating = 0;
+  const starBtns = document.querySelectorAll('#pr-stars-' + blockId + ' .pr-star-btn');
+  const ratingInput = document.getElementById('pr-rating-' + blockId);
+
+  function setRating(v) {
+    selectedRating = v;
+    ratingInput.value = v;
+    starBtns.forEach(s => {
+      const sv = parseInt(s.dataset.value);
+      s.classList.toggle('active', sv <= v);
+      s.setAttribute('aria-checked', sv === v ? 'true' : 'false');
+    });
+  }
+
+  starBtns.forEach(btn => {
+    btn.addEventListener('click',  () => setRating(parseInt(btn.dataset.value)));
+    btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') setRating(parseInt(btn.dataset.value)); });
+    btn.addEventListener('mouseenter', () => {
+      const v = parseInt(btn.dataset.value);
+      starBtns.forEach(s => s.classList.toggle('active', parseInt(s.dataset.value) <= v));
+    });
+    btn.addEventListener('mouseleave', () => setRating(selectedRating));
+  });
+
+  // ── Form submit ───────────────────────────────────────────────────────────
+  const form    = document.getElementById('pr-form-' + blockId);
+  const nameEl  = document.getElementById('pr-name-' + blockId);
+  const textEl  = document.getElementById('pr-text-' + blockId);
+  const submitEl= document.getElementById('pr-submit-' + blockId);
+  const fbEl    = document.getElementById('pr-feedback-' + blockId);
+
+  function feedback(type, msg) {
+    fbEl.textContent = msg;
+    fbEl.className = 'pr-feedback pr-' + type;
+  }
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const name = nameEl.value.trim();
+    const text = textEl.value.trim();
+
+    if (!name) { feedback('error', 'Please enter your name.'); return; }
+    if (!selectedRating) { feedback('error', 'Please select a star rating.'); return; }
+    if (!text) { feedback('error', 'Please write a review.'); return; }
+
+    submitEl.disabled = true;
+    submitEl.textContent = 'Submitting…';
+
+    try {
+      const res = await fetch(API + '/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_sku: SKU, customer_name: name, rating: selectedRating, review_text: text }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        feedback('success', 'Thank you! Your review has been submitted.');
+        nameEl.value = '';
+        textEl.value = '';
+        setRating(0);
+        setTimeout(loadReviews, 800);
+      } else {
+        feedback('error', (data.errors || [data.error || 'Submission failed.']).join(', '));
+      }
+    } catch (err) {
+      feedback('error', 'Network error. Please try again.');
+    } finally {
+      submitEl.disabled = false;
+      submitEl.textContent = 'Submit Review';
+    }
+  });
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  loadReviews();
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Product Reviews",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "app_url",
+      "label": "Review App URL",
+      "info": "Base URL of your FastAPI review server (e.g. https://your-server.ngrok.io). No trailing slash.",
+      "default": "http://localhost:8000"
+    },
+    {
+      "type": "text",
+      "id": "widget_title",
+      "label": "Widget Heading",
+      "default": "Customer Reviews"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_ai_summary",
+      "label": "Show AI Summary",
+      "default": true,
+      "info": "Display a one-sentence AI-generated summary of all reviews."
+    },
+    {
+      "type": "color",
+      "id": "primary_color",
+      "label": "Accent Color",
+      "default": "#6c63ff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Reviews"
+    }
+  ]
+}
+{% endschema %}
