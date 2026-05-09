@@ -168,11 +168,11 @@ def main():
         # 5. Query top 3 chunks
         top_chunks = query_knowledge_base(collection, question, top_k=3)
         
-        print("\n--- Top 3 Retrieved Chunks ---")
-        for i, chunk in enumerate(top_chunks, 1):
-            print(f"{i}. {chunk}")
+        # print("\n--- Top 3 Retrieved Chunks ---")
+        # for i, chunk in enumerate(top_chunks, 1):
+        #     print(f"{i}. {chunk}")
             
-        print("\n--- AI Agent Answer (via Groq) ---")
+        print("\n--- AI Agent Answer ---")
         answer = generate_answer_with_groq(question, top_chunks)
         print(answer)
         print("-" * 50)
