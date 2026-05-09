@@ -42,3 +42,20 @@ Example Questions
 - What is the MOQ for fragrance lipsticks?
 
 ---
+
+## 🔹 Task 2: AI Customer Intake Agent (Bilingual)
+The solution for Task 2 (AI Intake Agent) is located in the `Task 2/` folder.
+This is a FastAPI application that simulates an AI customer intake agent capable of automatically qualifying leads through a simulated WhatsApp/Instagram channel in English and Urdu.
+
+**To run the server:**
+```bash
+uv run uvicorn "Task 2.main:app" --reload
+
+and go to
+http://127.0.0.1:8000/docs 
+
+
+```
+*(Make sure to run this from the root directory so it can access the `.env` and `Task 1` vector database!)*
+
+Please see the internal `Task 2/README.md` for a full explanation of the design choices (SQLite state management, Prompts, Vector DB integration) and `curl` examples to test the English and Urdu flows.
