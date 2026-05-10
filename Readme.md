@@ -126,4 +126,6 @@ The scraeper will automatic try to avoid getting blocked . If scraper gets block
 
 ## Loom Video Link
 
+https://www.loom.com/share/59043dda86574709ac397e6d7e991eb8
+
 [![Watch the video](https://cdn.loom.com/sessions/thumbnails/59043dda86574709ac397e6d7e991eb8-with-play.gif)](https://www.loom.com/share/59043dda86574709ac397e6d7e991eb8)
