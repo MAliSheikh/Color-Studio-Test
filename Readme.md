@@ -124,4 +124,5 @@ Interactive API docs available at: http://localhost:8000/docs
 The scraeper will automatic try to avoid getting blocked . If scraper gets blocked try connecting vpn I tried proton vpn  and both method works with or without vpn.
 
 
+## Loom Video Link
 [![Watch the video](https://cdn.loom.com/sessions/thumbnails/YOUR_VIDEO_ID-with-play.gif)](https://www.loom.com/share/59043dda86574709ac397e6d7e991eb8)
