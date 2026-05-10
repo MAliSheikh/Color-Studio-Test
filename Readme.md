@@ -121,4 +121,7 @@ Then go to: http://localhost:8000/
 
 Interactive API docs available at: http://localhost:8000/docs
 
-Please see the internal `Task 4/README.md` for full installation instructions (including Shopify Partner setup, ngrok tunneling, and App Block configuration).
+The scraeper will automatic try to avoid getting blocked . If scraper gets blocked try connecting vpn I tried proton vpn  and both method works with or without vpn.
+
+
+[![Watch the video](https://cdn.loom.com/sessions/thumbnails/YOUR_VIDEO_ID-with-play.gif)](https://www.loom.com/share/59043dda86574709ac397e6d7e991eb8)

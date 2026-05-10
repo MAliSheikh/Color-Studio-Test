@@ -40,7 +40,6 @@ ACCEPT_LANGUAGES = [
 ]
 
 # We are using direct connections instead of failing proxies, 
-# but stealth mode + user-agent rotation helps bypass blocks.
 MAX_RETRIES    = 3
 BACKOFF_BASE   = 2.0
 BACKOFF_JITTER = 1.0
